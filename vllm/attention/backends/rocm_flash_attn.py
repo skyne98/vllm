@@ -680,7 +680,7 @@ def _use_rocm_custom_paged_attention(qtype: torch.dtype, head_size: int,
                                      block_size: int, gqa_ratio: int,
                                      max_seq_len: int) -> bool:
     # rocm custom page attention not support on navi (gfx1*)
-    return (_ON_MI250_MI300 and not _ON_NAVI
+    return (_ON_MI250_MI300 and not _ON_NAVI and not _ON_GCN5
             and (qtype == torch.half or qtype == torch.bfloat16)
             and (head_size == 64 or head_size == 128)
             and (block_size == 16 or block_size == 32)
