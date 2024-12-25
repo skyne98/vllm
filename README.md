@@ -39,6 +39,9 @@ source vllmenv/bin/activate
 git clone https://github.com/Said-Akbar/vllm-rocm.git
 cd vllm-rocm
 pip3 install -r requirements-rocm.txt
+# uninstall torch that comes with vllm. You need torch 2.6.0 or greater.
+pip3 uninstall torch torchaudio torchvision
+pip3 install --no-cache-dir --pre torch>=2.6 torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/rocm6.2
 pip3 install amdsmi
 # there might be setuptools and setuptools_scm version conflict. In that case, uninstall both first.
 # pip3 uninstall setuptools setuptools_scm
