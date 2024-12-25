@@ -1,3 +1,63 @@
+# Installation
+
+This is a fork of VLLM for AMD MI25/50/60.
+I assume you already have rocm 6.2.2 installed with GPU drivers.
+If not, use these commands (assuming you have Ubuntu 22.04):
+```
+sudo apt update
+sudo apt install "linux-headers-$(uname -r)" "linux-modules-extra-$(uname -r)"
+sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
+wget https://repo.radeon.com/amdgpu-install/6.2.2/ubuntu/jammy/amdgpu-install_6.2.60202-1_all.deb
+sudo apt install ./amdgpu-install_6.2.60202-1_all.deb
+sudo apt update
+sudo apt install amdgpu-dkms rocm
+# linker
+sudo tee --append /etc/ld.so.conf.d/rocm.conf <<EOF
+/opt/rocm/lib
+/opt/rocm/lib64
+EOF
+sudo ldconfig
+
+# path
+export PATH=$PATH:/opt/rocm-6.2.2/bin
+
+# verify drivers
+dkms status
+
+# You need to close all windows and reboot to make changes effective.
+reboot
+```
+Now you have rocm 6.2.2.
+If you have a single AMD GPU, you should be fine with just following commands below. If you have multiple AMD GPUs (e.g. 2xAMD50/60), then install my fork of triton 3.1.0.
+Install VLLM. 
+
+```
+# create venv
+python3 -m venv vllmenv
+source vllmenv/bin/activate
+git clone https://github.com/Said-Akbar/vllm-rocm.git
+cd vllm-rocm
+pip3 install -r requirements-rocm.txt
+pip3 install amdsmi
+# there might be setuptools and setuptools_scm version conflict. In that case, uninstall both first.
+# pip3 uninstall setuptools setuptools_scm
+pip3 install setuptools setuptools_scm
+pip3 install --upgrade cmake
+# build vllm
+python3 setup.py develop
+```
+If everything went well, you should be able to use vllm! It supports GGUF, GPTQ, FP16 in AMD GPUs.
+Since we did not build/install triton, we need to use VLLM_USE_TRITON_FLASH_ATTN=0 when serving a model. 
+Example command:
+
+```
+VLLM_USE_TRITON_FLASH_ATTN=0 vllm serve /home/ai-llm/Downloads/models/Meta-Llama-3.1-8B-Instruct-Q4_K_M/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf --max_model_len 1024
+```
+
+Note that if you need tensor parallelism with 2 or 4 AMD GPUs, you need to install my fork of triton 3.1.0 (why version 3.1.0? Because we need to match the version with pytorch-rocm-triton which was 3.1.0 at the time of writing).
+
+End of custom description.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/vllm-project/vllm/main/docs/source/assets/logos/vllm-logo-text-dark.png">
