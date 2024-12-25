@@ -28,7 +28,8 @@ dkms status
 reboot
 ```
 Now you have rocm 6.2.2.
-If you have a single AMD GPU, you should be fine with just following commands below. If you have multiple AMD GPUs (e.g. 2xAMD50/60), then install my fork of triton 3.1.0.
+If you have a single AMD GPU, you should be fine with just following commands below. If you have multiple AMD GPUs (e.g. 2xAMD50/60), then install my fork of triton 3.1.0 - https://github.com/Said-Akbar/triton-gcn5.git.
+
 Install VLLM. 
 
 ```
