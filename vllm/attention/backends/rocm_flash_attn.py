@@ -26,6 +26,9 @@ logger = init_logger(__name__)
 _PARTITION_SIZE_ROCM = 256
 _GPU_ARCH = torch.cuda.get_device_properties("cuda").gcnArchName
 _ON_NAVI = "gfx1" in _GPU_ARCH
+gcn_matches = ["gfx900", "gfx902", "gfx906"]
+_ON_GCN5 = any(gcn_matches in _GPU_ARCH for gcn_matches in _GPU_ARCH)
+print("_ON_GCN5: " + str(_ON_GCN5))
 _ON_MI250_MI300 = any(arch in _GPU_ARCH for arch in ["gfx90a", "gfx942"])
 
 
@@ -904,7 +907,7 @@ def _use_rocm_custom_paged_attention(qtype: torch.dtype, head_size: int,
                                      block_size: int, gqa_ratio: int,
                                      max_seq_len: int) -> bool:
     # rocm custom page attention not support on navi (gfx1*)
-    return (_ON_MI250_MI300 and not _ON_NAVI
+    return (_ON_MI250_MI300 and not _ON_NAVI and not _ON_GCN5
             and (qtype == torch.half or qtype == torch.bfloat16)
             and (head_size == 64 or head_size == 128)
             and (block_size == 16 or block_size == 32)
